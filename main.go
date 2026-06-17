@@ -26,8 +26,8 @@ func RunHTTPServer() {
 		fmt.Printf("Request Headers: %v\n", r.Header)
 		fmt.Println()
 
-		// Sleep for 5 seconds
-		time.Sleep(10 * time.Second)
+		// Sleep for 15 seconds
+		time.Sleep(15 * time.Second)
 
 		afterSleepTime := time.Now()
 		elapsed := afterSleepTime.Sub(curTime)
@@ -56,7 +56,7 @@ func RunHTTPServer() {
 		Handler:      nil,
 		ReadTimeout:  0,
 		WriteTimeout: 0,
-		IdleTimeout:  120 * time.Second, // Keep connection open up to 120s idle
+		IdleTimeout:  0,
 	}
 
 	err := httpServer.ListenAndServe()
