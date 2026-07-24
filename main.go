@@ -20,6 +20,7 @@ func main() {
 }
 
 func RunHttPServer() {
+	// define HTTP API server routes
 	http.HandleFunc("/", DelayHttpResponse)
 	http.HandleFunc("/httptimer", ServeTimerOp)
 
@@ -52,7 +53,7 @@ func ServeTimerOp(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "PUT":
 		// if request body empty, throw error
-		if r.ContentLength == 0 {
+		if r.ContentLength <= 0 {
 			_, err := w.Write([]byte("Request body empty for PUT\n"))
 			if err != nil {
 				fmt.Printf("Error thrown writing zero body error: %v\n", err)
@@ -70,12 +71,14 @@ func ServeTimerOp(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		fmt.Println(string(body))
+
 		// unmarshall body into Go map
 		var unmarshalledResp map[string]interface{}
 		err = json.Unmarshal(body, &unmarshalledResp)
 		if err != nil {
 			fmt.Printf("Error unmarshalling request body: %v\n", err)
-			w.WriteHeader(500) // return 500 internal server error
+			w.WriteHeader(400) // return 400 bad request
 			break
 		}
 
@@ -83,19 +86,26 @@ func ServeTimerOp(w http.ResponseWriter, r *http.Request) {
 		
 		// if request body doesn't contain a HTTP timer value
 		if !found {
-			fmt.Printf("No httpTimer key and value found.")
+			fmt.Printf("No httpTimer key and value found in payload.")
 			w.WriteHeader(400) // return 400 bad request
 			break
 		}
 
 		
 		switch varType := userTimerToSet.(type) {
-		case int:
-			httpTimer = userTimerToSet.(int)
+		case float64:
+			valToCheck := int(userTimerToSet.(float64)) // set global httpTimer value
+			if valToCheck < 0 { // check if value is negative
+				w.WriteHeader(400)
+				w.Write(fmt.Appendf(nil, "HTTP timer value cannot be negative. Value provided: %v\n", valToCheck))
+				break
+			}
+			httpTimer = valToCheck
 			w.WriteHeader(200) // return 200 OK 
-		default:
-			w.Write(fmt.Appendf(nil, "HTTP timer value is not an integer. Of type: %v\n", varType))
-			w.WriteHeader(400) // return 400 bad request
+			w.Write(fmt.Appendf(nil, "HTTP timer value set to: %v seconds\n", httpTimer))
+		default:	
+			w.WriteHeader(400) // return 400 bad request	
+			w.Write(fmt.Appendf(nil, "HTTP timer value is not an integer. Of type: %T\n", varType))	
 		}
 
 
@@ -117,7 +127,7 @@ func ServeTimerOp(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
+// function to serve / API endpoint
 func DelayHttpResponse(w http.ResponseWriter, r *http.Request) {
 
 	LogRequestMetaData(r)
