@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -34,12 +37,26 @@ func RunHttPServer() {
 		Handler:      nil,
 		ReadTimeout:  0,
 		WriteTimeout: 0,
-		IdleTimeout:  0,
+		IdleTimeout:  120 * time.Second, // 2min idle timeout for keep-alive connections
 	}
 
-	err := httpServer.ListenAndServe()
+	// creating tcp keep-alive config to disable keep-alive connections
+	tcpConfig := net.ListenConfig{
+		KeepAlive: -1,
+	}
+
+	// create tcp listener with keep-alive config
+	tcpListener, err := tcpConfig.Listen(context.Background(), "tcp", curListeningPort)
 	if err != nil {
-		fmt.Printf("Error thrown from httpServer.ListenAndServe(): %v\n", err)
+		log.Fatalf("Error thrown creating tcpListener: %v\n", err)
+	}
+
+	//err := httpServer.ListenAndServe()
+
+	// start HTTP server with tcp listener
+	err = httpServer.Serve(tcpListener)
+	if err != nil {
+		log.Fatalf("Error thrown from httpServer.Serve(): %v\n", err)
 	}
 }
 
