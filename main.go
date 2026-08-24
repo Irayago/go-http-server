@@ -114,15 +114,24 @@ func ServeTimerOp(w http.ResponseWriter, r *http.Request) {
 			valToCheck := int(userTimerToSet.(float64)) // set global httpTimer value
 			if valToCheck < 0 { // check if value is negative
 				w.WriteHeader(400)
-				w.Write(fmt.Appendf(nil, "HTTP timer value cannot be negative. Value provided: %v\n", valToCheck))
+				_, err := w.Write(fmt.Appendf(nil, "HTTP timer value cannot be negative. Value provided: %v\n", valToCheck))
+				if err != nil {
+					fmt.Printf("Error thrown writing error HTTP timer negative value response: %v\n", err)
+				}
 				break
 			}
 			httpTimer = valToCheck
 			w.WriteHeader(200) // return 200 OK 
-			w.Write(fmt.Appendf(nil, "HTTP timer value set to: %v seconds\n", httpTimer))
+			_, err := w.Write(fmt.Appendf(nil, "HTTP timer value set to: %v seconds\n", httpTimer))
+			if err != nil {
+				fmt.Printf("Error thrown writing success response: %v\n", err)
+			}
 		default:	
 			w.WriteHeader(400) // return 400 bad request	
-			w.Write(fmt.Appendf(nil, "HTTP timer value is not an integer. Of type: %T\n", varType))	
+			_, err := w.Write(fmt.Appendf(nil, "HTTP timer value is not an integer. Of type: %T\n", varType))	
+			if err != nil {
+				fmt.Printf("Error thrown writing error HTTP timer non-integer value response: %v\n", err)
+			}
 		}
 
 
@@ -162,6 +171,16 @@ func DelayHttpResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Response Headers: %v\n", w.Header())
+
+	// if the request path is /bigresponse, send a big response
+	if r.URL.Path == "/bigresponse" {
+		bigRes := make([]byte, 10*1024*1024) // 10MB response
+		_, err = w.Write(bigRes)
+		if err != nil {
+			fmt.Printf("Error thrown writing big response: %v\n", err)
+		}
+	}
+
 	_, err = w.Write([]byte(response))
 	if err != nil {
 		fmt.Printf("Error thrown writing response: %v\n", err)
