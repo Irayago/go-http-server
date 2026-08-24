@@ -10,7 +10,7 @@ A simple Go HTTP server for testing client/server request behavior, response del
 
 ![Demo of go-http-server handling a delayed request](demo.gif)
 
-*Run `go run main.go`, then hit the server with `curl` or the included PowerShell client and watch the configurable delay and request logging in action.*
+_Run `go run main.go`, then hit the server with `curl` or the included PowerShell client and watch the configurable delay and request logging in action._
 
 ## Features
 
@@ -82,6 +82,10 @@ Invoke-WebRequest -Uri "http://REPLACE_WITH_IP" | Select-Object -ExpandProperty 
 ```
 
 A commented-out loop is included in the script for sending multiple requests over the same TCP connection, if you want to test connection reuse.
+
+## Coming Soon
+
+- API endpoints for adjusting HTTP server timeouts
 
 ## Project Structure
 

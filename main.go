@@ -51,8 +51,6 @@ func RunHttPServer() {
 		log.Fatalf("Error thrown creating tcpListener: %v\n", err)
 	}
 
-	//err := httpServer.ListenAndServe()
-
 	// start HTTP server with tcp listener
 	err = httpServer.Serve(tcpListener)
 	if err != nil {
