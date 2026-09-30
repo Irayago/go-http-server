@@ -172,7 +172,7 @@ func DelayHttpResponse(w http.ResponseWriter, r *http.Request) {
 
 	// if the request path is /bigresponse, send a big response
 	if r.URL.Path == "/bigresponse" {
-		bigRes := make([]byte, 22*1024) // changed from 10Mb to 22Kb response
+		bigRes := make([]byte, 1*1024*1024) // changed from 22Kb to 1Mb response
 		_, err = w.Write(bigRes)
 		if err != nil {
 			fmt.Printf("Error thrown writing big response: %v\n", err)
